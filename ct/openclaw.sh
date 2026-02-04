@@ -4,13 +4,13 @@ source <(curl -fsSL https://raw.githubusercontent.com/spectrl/ProxmoxVE/openclaw
 # Author: pfassina
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/openclaw/openclaw
-# Modified: Adapted to use Bun instead of Node.js, added security hardening
+# Modified: Added security hardening
 
 APP="OpenClaw"
 var_tags="${var_tags:-ai-assistant;chatops}"
 var_cpu="${var_cpu:-2}"
 var_ram="${var_ram:-2048}"
-var_disk="${var_disk:-4}"
+var_disk="${var_disk:-8}"
 var_os="${var_os:-debian}"
 var_version="${var_version:-13}"
 var_unprivileged="${var_unprivileged:-1}"
@@ -32,12 +32,8 @@ function update_script() {
   systemctl stop openclaw
   msg_ok "Stopped Service"
 
-  msg_info "Updating Bun"
-  bun upgrade
-  msg_ok "Updated Bun"
-
   msg_info "Updating OpenClaw"
-  bun install -g openclaw
+  npm update -g openclaw
   msg_ok "Updated OpenClaw"
 
   msg_info "Running Security Audit"
