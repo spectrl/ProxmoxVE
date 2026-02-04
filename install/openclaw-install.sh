@@ -4,7 +4,7 @@
 # Author: pfassina
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/openclaw/openclaw
-# Modified: Adapted to use Bun instead of Node.js, added security hardening
+# Modified: Added security hardening
 
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
 color
@@ -24,19 +24,9 @@ sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_
 systemctl restart sshd
 msg_ok "Enabled SSH Root Access"
 
-msg_info "Installing Bun"
-export BUN_INSTALL="/root/.bun"
-curl -fsSL https://bun.sh/install | bash &>/dev/null
-ln -sf /root/.bun/bin/bun /usr/local/bin/bun
-ln -sf /root/.bun/bin/bunx /usr/local/bin/bunx
-ln -sf /root/.bun/bin/bun /usr/local/bin/node
-export PATH="/usr/local/bin:/root/.bun/bin:$PATH"
-hash -r
-msg_ok "Installed Bun $(/usr/local/bin/bun --version)"
-
-msg_info "Installing OpenClaw"
-$STD /usr/local/bin/bun install -g openclaw
-msg_ok "Installed OpenClaw"
+msg_info "Installing Node.js"
+NODE_VERSION="22" NODE_MODULE="openclaw" setup_nodejs
+msg_ok "Installed Node.js $(node -v)"
 
 msg_info "Setup OpenClaw"
 mkdir -p /root/.openclaw
@@ -86,12 +76,10 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/root/.bun/bin/openclaw gateway --port 18789
+ExecStart=/usr/bin/openclaw gateway --port 18789
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
-Environment=BUN_INSTALL=/root/.bun
-Environment=PATH=/usr/local/bin:/root/.bun/bin:/usr/bin:/bin
 
 [Install]
 WantedBy=multi-user.target
