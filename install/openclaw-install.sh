@@ -25,6 +25,7 @@ export BUN_INSTALL="/root/.bun"
 curl -fsSL https://bun.sh/install | bash &>/dev/null
 ln -sf /root/.bun/bin/bun /usr/local/bin/bun
 ln -sf /root/.bun/bin/bunx /usr/local/bin/bunx
+ln -sf /root/.bun/bin/bun /usr/local/bin/node
 export PATH="/usr/local/bin:/root/.bun/bin:$PATH"
 hash -r
 msg_ok "Installed Bun $(/usr/local/bin/bun --version)"
@@ -81,7 +82,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/bun run openclaw gateway --port 18789
+ExecStart=/root/.bun/bin/openclaw gateway --port 18789
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
