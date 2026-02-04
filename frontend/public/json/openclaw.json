@@ -1,0 +1,57 @@
+{
+  "name": "OpenClaw",
+  "slug": "openclaw",
+  "categories": [
+    22,
+    20
+  ],
+  "date_created": "2026-02-04",
+  "type": "ct",
+  "updateable": true,
+  "privileged": false,
+  "interface_port": null,
+  "documentation": "https://docs.openclaw.ai",
+  "website": "https://openclaw.ai",
+  "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/openclaw.webp",
+  "config_path": "/root/.openclaw/openclaw.json",
+  "description": "OpenClaw is a personal AI assistant that runs locally and integrates with messaging platforms like WhatsApp, Telegram, Discord, and Slack. Security hardened with loopback binding, token auth, and DM pairing.",
+  "install_methods": [
+    {
+      "type": "default",
+      "script": "ct/openclaw.sh",
+      "resources": {
+        "cpu": 2,
+        "ram": 2048,
+        "hdd": 4,
+        "os": "debian",
+        "version": "13"
+      }
+    }
+  ],
+  "default_credentials": {
+    "username": null,
+    "password": null
+  },
+  "notes": [
+    {
+      "text": "Gateway binds to loopback only (security hardened). Access requires SSH tunnel.",
+      "type": "info"
+    },
+    {
+      "text": "Run 'openclaw onboard' inside the container to configure AI providers and messaging channels.",
+      "type": "info"
+    },
+    {
+      "text": "Gateway starts automatically. Token saved to /root/.openclaw/.gateway-token",
+      "type": "info"
+    },
+    {
+      "text": "To access Control UI: ssh -L 18789:localhost:18789 root@<container-ip>, then open http://localhost:18789?token=YOUR_TOKEN",
+      "type": "warning"
+    },
+    {
+      "text": "WhatsApp/Telegram work without UI access. DM pairing enabled - strangers must be approved.",
+      "type": "info"
+    }
+  ]
+}
