@@ -15,8 +15,10 @@ network_check
 update_os
 
 msg_info "Installing Dependencies"
-$STD apt install -y git curl unzip openssl
+$STD apt install -y git curl unzip openssl openssh-server
 msg_ok "Installed Dependencies"
+
+SSH_ROOT=yes
 
 msg_info "Installing Bun"
 $STD curl -fsSL https://bun.sh/install | bash
