@@ -18,7 +18,11 @@ msg_info "Installing Dependencies"
 $STD apt install -y git curl unzip openssl openssh-server
 msg_ok "Installed Dependencies"
 
-SSH_ROOT=yes
+msg_info "Enabling SSH Root Access"
+sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+systemctl restart sshd
+msg_ok "Enabled SSH Root Access"
 
 msg_info "Installing Bun"
 export BUN_INSTALL="/root/.bun"
