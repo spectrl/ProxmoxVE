@@ -21,15 +21,16 @@ msg_ok "Installed Dependencies"
 SSH_ROOT=yes
 
 msg_info "Installing Bun"
-$STD curl -fsSL https://bun.sh/install | bash
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-ln -sf "$BUN_INSTALL/bin/bun" /usr/local/bin/bun
-ln -sf "$BUN_INSTALL/bin/bunx" /usr/local/bin/bunx
-msg_ok "Installed Bun $(bun --version)"
+export BUN_INSTALL="/root/.bun"
+curl -fsSL https://bun.sh/install | bash &>/dev/null
+ln -sf /root/.bun/bin/bun /usr/local/bin/bun
+ln -sf /root/.bun/bin/bunx /usr/local/bin/bunx
+export PATH="/usr/local/bin:/root/.bun/bin:$PATH"
+hash -r
+msg_ok "Installed Bun $(/usr/local/bin/bun --version)"
 
 msg_info "Installing OpenClaw"
-$STD bun install -g openclaw
+$STD /usr/local/bin/bun install -g openclaw
 msg_ok "Installed OpenClaw"
 
 msg_info "Setup OpenClaw"
