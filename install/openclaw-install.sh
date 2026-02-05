@@ -20,8 +20,12 @@ msg_ok "Installed Dependencies"
 
 msg_info "Creating openclaw user"
 useradd -m -s /bin/bash openclaw
+OPENCLAW_PASSWORD=$(openssl rand -base64 12)
+echo "openclaw:${OPENCLAW_PASSWORD}" | chpasswd
 echo "openclaw ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/openclaw
 chmod 440 /etc/sudoers.d/openclaw
+echo "${OPENCLAW_PASSWORD}" > /root/.openclaw-user-password
+chmod 600 /root/.openclaw-user-password
 msg_ok "Created openclaw user"
 
 msg_info "Installing Homebrew"
@@ -87,11 +91,6 @@ chmod 700 /home/openclaw/.openclaw
 chmod 600 /home/openclaw/.openclaw/openclaw.json
 chmod 600 /home/openclaw/.openclaw/.gateway-token
 msg_ok "Setup OpenClaw config"
-
-msg_info "Installing OpenClaw service"
-sudo -u openclaw XDG_RUNTIME_DIR=/run/user/$(id -u openclaw) openclaw gateway install || true
-sudo -u openclaw XDG_RUNTIME_DIR=/run/user/$(id -u openclaw) systemctl --user enable openclaw-gateway.service || true
-msg_ok "Installed OpenClaw service"
 
 msg_info "Running Security Audit"
 sudo -u openclaw openclaw security audit --fix || true

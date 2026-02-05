@@ -24,26 +24,19 @@ function update_script() {
   header_info
   check_container_storage
   check_container_resources
-  if [[ ! -f /etc/systemd/system/openclaw.service ]]; then
+  if ! command -v openclaw &>/dev/null; then
     msg_error "No ${APP} Installation Found!"
     exit
   fi
-  msg_info "Stopping Service"
-  systemctl stop openclaw
-  msg_ok "Stopped Service"
-
   msg_info "Updating OpenClaw"
   npm update -g openclaw
   msg_ok "Updated OpenClaw"
 
   msg_info "Running Security Audit"
-  openclaw security audit --fix || true
+  sudo -u openclaw openclaw security audit --fix || true
   msg_ok "Security Audit Complete"
 
-  msg_info "Starting Service"
-  systemctl start openclaw
-  msg_ok "Started Service"
-  msg_ok "Updated successfully!"
+  msg_ok "Updated successfully! Restart gateway with: sudo -u openclaw openclaw gateway restart"
   exit
 }
 
@@ -51,15 +44,23 @@ start
 build_container
 description
 
+OPENCLAW_PASS=$(pct exec $CTID -- cat /root/.openclaw-user-password 2>/dev/null || echo "check /root/.openclaw-user-password")
+
 msg_ok "Completed successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
-echo -e "${INFO}${YW} Run 'openclaw onboard' inside the container to complete setup${CL}"
+echo -e ""
+echo -e "${INFO}${YW} SSH Credentials:${CL}"
+echo -e "${TAB}${YW}User: ${BGN}openclaw${CL}"
+echo -e "${TAB}${YW}Password: ${BGN}${OPENCLAW_PASS}${CL}"
+echo -e ""
+echo -e "${INFO}${YW} Complete setup:${CL}"
+echo -e "${TAB}${YW}1. ${BGN}ssh openclaw@${IP}${CL}"
+echo -e "${TAB}${YW}2. ${BGN}openclaw onboard --install-daemon${CL}"
 echo -e ""
 echo -e "${INFO}${YW} Gateway binds to loopback only (official security best practice)${CL}"
 echo -e "${INFO}${YW} To access the Control UI via SSH tunnel:${CL}"
-echo -e "${TAB}${YW}1. ${BGN}ssh -L 18789:localhost:18789 root@${IP}${CL}"
-echo -e "${TAB}${YW}2. Get token: ${BGN}cat /root/.openclaw/.gateway-token${CL}"
+echo -e "${TAB}${YW}1. ${BGN}ssh -L 18789:localhost:18789 openclaw@${IP}${CL}"
+echo -e "${TAB}${YW}2. Get token: ${BGN}cat ~/.openclaw/.gateway-token${CL}"
 echo -e "${TAB}${YW}3. Open: ${BGN}http://localhost:18789?token=YOUR_TOKEN${CL}"
 echo -e ""
-echo -e "${INFO}${YW} Alternative: Install Tailscale for easier remote access${CL}"
-echo -e "${INFO}${YW} WhatsApp/Telegram work without UI access${CL}"
+echo -e "${INFO}${YW} Change password: ${BGN}passwd${CL} after first login${CL}"
