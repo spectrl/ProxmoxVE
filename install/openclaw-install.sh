@@ -4,7 +4,7 @@
 # Author: pfassina
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/openclaw/openclaw
-# Modified: Added security hardening
+# Modified: Added security hardening, user service setup
 
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
 color
@@ -15,23 +15,35 @@ network_check
 update_os
 
 msg_info "Installing Dependencies"
-$STD apt install -y git curl unzip openssl openssh-server
+$STD apt install -y git curl unzip openssl openssh-server dbus-user-session
 msg_ok "Installed Dependencies"
 
-msg_info "Enabling SSH Root Access"
+msg_info "Creating openclaw user"
+useradd -m -s /bin/bash openclaw
+echo "openclaw ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/openclaw
+chmod 440 /etc/sudoers.d/openclaw
+msg_ok "Created openclaw user"
+
+msg_info "Enabling SSH Access"
 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl restart sshd
-msg_ok "Enabled SSH Root Access"
+msg_ok "Enabled SSH Access"
 
 msg_info "Installing Node.js"
 NODE_VERSION="22" NODE_MODULE="openclaw" setup_nodejs
 msg_ok "Installed Node.js $(node -v)"
 
-msg_info "Setup OpenClaw"
-mkdir -p /root/.openclaw
+msg_info "Enabling user services for openclaw"
+loginctl enable-linger openclaw
+mkdir -p /home/openclaw/.config/systemd/user
+chown -R openclaw:openclaw /home/openclaw/.config
+msg_ok "Enabled user services"
+
+msg_info "Setup OpenClaw config"
+mkdir -p /home/openclaw/.openclaw
 GATEWAY_TOKEN=$(openssl rand -hex 32)
-cat <<CONF >/root/.openclaw/openclaw.json
+cat <<CONF >/home/openclaw/.openclaw/openclaw.json
 {
   "gateway": {
     "bind": "loopback",
@@ -64,35 +76,21 @@ cat <<CONF >/root/.openclaw/openclaw.json
   }
 }
 CONF
-chmod 700 /root/.openclaw
-chmod 600 /root/.openclaw/openclaw.json
-msg_ok "Setup OpenClaw"
+echo "${GATEWAY_TOKEN}" > /home/openclaw/.openclaw/.gateway-token
+chown -R openclaw:openclaw /home/openclaw/.openclaw
+chmod 700 /home/openclaw/.openclaw
+chmod 600 /home/openclaw/.openclaw/openclaw.json
+chmod 600 /home/openclaw/.openclaw/.gateway-token
+msg_ok "Setup OpenClaw config"
 
-msg_info "Creating Service"
-cat <<EOF >/etc/systemd/system/openclaw.service
-[Unit]
-Description=OpenClaw Gateway
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/openclaw gateway --port 18789
-Restart=always
-RestartSec=10
-Environment=NODE_ENV=production
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl enable -q openclaw
-msg_ok "Created Service"
+msg_info "Installing OpenClaw service"
+sudo -u openclaw XDG_RUNTIME_DIR=/run/user/$(id -u openclaw) openclaw gateway install || true
+sudo -u openclaw XDG_RUNTIME_DIR=/run/user/$(id -u openclaw) systemctl --user enable openclaw-gateway.service || true
+msg_ok "Installed OpenClaw service"
 
 msg_info "Running Security Audit"
-$STD openclaw security audit --fix || true
+sudo -u openclaw openclaw security audit --fix || true
 msg_ok "Security Audit Complete"
-
-echo "${GATEWAY_TOKEN}" > /root/.openclaw/.gateway-token
-chmod 600 /root/.openclaw/.gateway-token
 
 motd_ssh
 customize
