@@ -44,14 +44,12 @@ start
 build_container
 description
 
-OPENCLAW_PASS=$(pct exec $CTID -- cat /root/.openclaw-user-password 2>/dev/null || echo "check /root/.openclaw-user-password")
-
 msg_ok "Completed successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
 echo -e ""
 echo -e "${INFO}${YW} SSH Credentials:${CL}"
 echo -e "${TAB}${YW}User: ${BGN}openclaw${CL}"
-echo -e "${TAB}${YW}Password: ${BGN}${OPENCLAW_PASS}${CL}"
+echo -e "${TAB}${YW}Password: ${BGN}openclaw${CL} (change after first login)"
 echo -e ""
 echo -e "${INFO}${YW} Complete setup:${CL}"
 echo -e "${TAB}${YW}1. ${BGN}ssh openclaw@${IP}${CL}"

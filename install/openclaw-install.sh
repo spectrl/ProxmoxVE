@@ -20,13 +20,10 @@ msg_ok "Installed Dependencies"
 
 msg_info "Creating openclaw user"
 useradd -m -s /bin/bash openclaw
-OPENCLAW_PASSWORD=$(openssl rand -base64 12)
-echo "openclaw:${OPENCLAW_PASSWORD}" | chpasswd
+echo "openclaw:openclaw" | chpasswd
 echo "openclaw ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/openclaw
 chmod 440 /etc/sudoers.d/openclaw
-echo "${OPENCLAW_PASSWORD}" > /root/.openclaw-user-password
-chmod 600 /root/.openclaw-user-password
-msg_ok "Created openclaw user"
+msg_ok "Created openclaw user (password: openclaw)"
 
 msg_info "Installing Homebrew"
 sudo -u openclaw NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
