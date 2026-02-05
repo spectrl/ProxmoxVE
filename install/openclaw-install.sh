@@ -15,7 +15,7 @@ network_check
 update_os
 
 msg_info "Installing Dependencies"
-$STD apt install -y git curl unzip openssl openssh-server dbus-user-session
+$STD apt install -y git curl unzip openssl openssh-server dbus-user-session build-essential procps file
 msg_ok "Installed Dependencies"
 
 msg_info "Creating openclaw user"
@@ -23,6 +23,11 @@ useradd -m -s /bin/bash openclaw
 echo "openclaw ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/openclaw
 chmod 440 /etc/sudoers.d/openclaw
 msg_ok "Created openclaw user"
+
+msg_info "Installing Homebrew"
+sudo -u openclaw NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/openclaw/.bashrc
+msg_ok "Installed Homebrew"
 
 msg_info "Enabling SSH Access"
 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
